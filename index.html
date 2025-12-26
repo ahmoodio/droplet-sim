@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Interactive physics simulation tracking water droplets falling due to gravity with realistic motion and beautiful visuals">
+    <title>Droplet Physics Simulator - Gravity Simulation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Droplet Physics Simulator</h1>
+            <p class="subtitle">Interactive gravity simulation with realistic physics</p>
+        </header>
+
+        <div class="main-content">
+            <div class="canvas-container">
+                <canvas id="simulationCanvas"></canvas>
+                <div class="canvas-overlay">
+                    <div class="stats-panel">
+                        <div class="stat-item">
+                            <span class="stat-label">Active Droplets</span>
+                            <span class="stat-value" id="dropletCount">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Gravity</span>
+                            <span class="stat-value" id="gravityValue">9.8 m/s²</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Time Elapsed</span>
+                            <span class="stat-value" id="timeElapsed">0.0s</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-panel">
+                <div class="control-section">
+                    <h2>Physics Controls</h2>
+
+                    <div class="control-group">
+                        <label for="gravitySlider">
+                            <span>Gravity (m/s²)</span>
+                            <span class="control-value" id="gravityDisplay">9.8</span>
+                        </label>
+                        <input type="range" id="gravitySlider" min="0" max="20" step="0.1" value="9.8">
+                    </div>
+
+                    <div class="control-group">
+                        <label for="massSlider">
+                            <span>Droplet Mass (mg)</span>
+                            <span class="control-value" id="massDisplay">5.0</span>
+                        </label>
+                        <input type="range" id="massSlider" min="1" max="20" step="0.5" value="5">
+                    </div>
+
+                    <div class="control-group">
+                        <label for="airResistanceSlider">
+                            <span>Air Resistance</span>
+                            <span class="control-value" id="airResistanceDisplay">0.02</span>
+                        </label>
+                        <input type="range" id="airResistanceSlider" min="0" max="0.1" step="0.001" value="0.02">
+                    </div>
+
+                    <div class="control-group">
+                        <label for="dropletSizeSlider">
+                            <span>Droplet Size</span>
+                            <span class="control-value" id="dropletSizeDisplay">8</span>
+                        </label>
+                        <input type="range" id="dropletSizeSlider" min="4" max="20" step="1" value="8">
+                    </div>
+
+                    <div class="control-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="trailsCheckbox" checked>
+                            <span>Show Trails</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" id="velocityVectorsCheckbox">
+                            <span>Show Velocity Vectors</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h2>Vibration & Replay</h2>
+
+                    <div class="control-group">
+                        <label for="freqSlider">
+                            <span>Frequency (Hz)</span>
+                            <span class="control-value" id="freqDisplay">30</span>
+                        </label>
+                        <input type="range" id="freqSlider" min="10" max="80" step="1" value="30">
+                    </div>
+
+                    <div class="control-group">
+                        <label for="ampSlider">
+                            <span>Amplitude</span>
+                            <span class="control-value" id="ampDisplay">0.5</span>
+                        </label>
+                        <input type="range" id="ampSlider" min="0" max="2" step="0.1" value="0.5">
+                    </div>
+
+                    <div class="button-group" style="margin-top: var(--spacing-md);">
+                        <button id="recordBtn" class="btn btn-secondary">REC</button>
+                        <button id="replayBtn" class="btn btn-secondary">Replay</button>
+                    </div>
+                    <div class="control-group" id="timelineGroup" style="display: none; margin-top: var(--spacing-md);">
+                        <label>
+                            <span>Replay</span>
+                            <span class="control-value" id="replayTimeDisplay">0.0s</span>
+                        </label>
+                        <input type="range" id="replaySlider" min="0" max="100" step="1" value="0">
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h2>Simulation Controls</h2>
+
+                    <div class="button-group">
+                        <button id="startBtn" class="btn btn-primary">Start</button>
+                        <button id="pauseBtn" class="btn btn-secondary">Pause</button>
+                        <button id="resetBtn" class="btn btn-danger">Reset</button>
+                    </div>
+
+                    <div class="button-group">
+                        <button id="addDropletBtn" class="btn btn-accent">Add Droplet</button>
+                        <button id="rainModeBtn" class="btn btn-accent">Rain Mode</button>
+                    </div>
+                </div>
+
+                <div class="control-section info-section">
+                    <h2>Math & Physics</h2>
+                    <div class="info-content">
+                        <p><strong>Faraday Wave Instability:</strong></p>
+                        <p class="equation" style="font-size: 0.8rem;">y(x,z,t) = A·cos(kx)·cos(kz)·cos(2πft)</p>
+                        <p><strong>Bouncing Condition (Weber):</strong></p>
+                        <p class="equation" style="font-size: 0.8rem;">We = ρv²D / σ < We_c</p>
+                                <div style="font-size: 0.75rem; color: var(--color-text-muted); margin-top: 5px;">
+                                    We < 50 → Bounce<br>
+                                        We > 50 → Splash/Coalesce
+                                </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
